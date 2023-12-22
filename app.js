@@ -111,6 +111,26 @@ app.get('/api/v1/tours/:id', (req, res) => {
     });
 })
 
+// To update a particular tour
+app.patch('/api/v1/tours/:id', (req, res) => {
+
+    const id = Number(req.params.id)
+
+    if(id > tours.length) {
+        return res.status(404).json({
+            status: "fail",
+            message: 'Invalid ID'
+        })
+    }
+
+    res.status(200).json({
+        status: "success",
+        data: {
+            tour: "<Updated Tour Here>"
+        }
+    })
+})
+
 // The first method that we will use is basically listen method to start up the server.
 const port = 3000;
 app.listen(port, () => {
