@@ -1,7 +1,11 @@
 const express = require('express');
 const fs = require('fs');
+const morgan = require('morgan');
 
 const app = express();
+
+// Here we are using morgan middleware
+app.use(morgan('dev'));
 
 app.use(express.json());
 
