@@ -5,12 +5,28 @@ const app = express();
 
 app.use(express.json());
 
+// Creating our own middleware function. It accepts three arguments req, res and next
+app.use((req, res, next) => {
+    console.log("Hello from the middleware");
+
+    // It is very important to use nexy in every middleware in order to move forward in our request response cycle
+    next();
+})
+
+// Another middleware example to get a time when this req is made
+app.use((req, res, next) => {
+    req.requestTime = new Date().toISOString();
+    next();
+})
+
 const tours = JSON.parse(fs.readFileSync(`${__dirname}/dev-data/data/tours-simple.json`));
 
 const getAllTours = (req, res) => {
+
     res.status(200).json({
 
         status: 'success',
+        requestedAt: req.requestTime,
         results: tours.length,
         data: {
             
