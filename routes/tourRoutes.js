@@ -2,11 +2,14 @@ const express = require('express');
 const tourController = require('./../controllers/tourController');
 
 // destructuring to get all the exported handlers
-const {getAllTours, createTour, getTour, updateTour, deleteTour} = tourController;
+const {getAllTours, createTour, getTour, updateTour, deleteTour, checkID, checkBody} = tourController;
 
 const router = express.Router();
 
-router.route('/').get(getAllTours).post(createTour);
+// A param middleware that calls a middlware function that is situated in the controller
+router.param('id', checkID);
+
+router.route('/').get(getAllTours).post(checkBody, createTour);
 
 router.route('/:id').get(getTour).patch(updateTour).delete(deleteTour);
 

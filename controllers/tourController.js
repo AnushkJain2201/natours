@@ -2,6 +2,32 @@ const fs = require('fs');
 
 const tours = JSON.parse(fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`));
 
+// A middleware to check whether the id is valid or not
+exports.checkID = (req, res, next, val) => {
+    if(val > tours.length) {
+        return res.status(404).json({
+            status: "fail",
+            message: 'Invalid ID'
+        });
+    }
+
+    next();
+}
+
+// A middleware to check whether the body contains the name and the price parameter
+exports.checkBody = (req, res, next) => {
+    const {name, price} = req.body;
+
+    if(!name || !price) {
+        res.status(400).json({
+            status: 'failed',
+            message: 'Bad Request'
+        })
+    }
+    
+    next();
+}
+
 exports.getAllTours = (req, res) => {
 
     res.status(200).json({
@@ -25,7 +51,7 @@ exports.createTour = (req, res) => {
 
     fs.writeFile("${__dirname}/dev-data/data/tours-simple.json", JSON.stringify(tours), err => {
         res.status(201).json({
-            status: "success",
+            status: 'success',
             data: {
                 tour: newTour
             }
@@ -37,13 +63,6 @@ exports.getTour =  (req, res) => {
     console.log(req.params);
 
     const id = Number(req.params.id)
-
-    if(id > tours.length) {
-        return res.status(404).json({
-            status: "fail",
-            message: 'Invalid ID'
-        })
-    }
 
     const tour = tours.find(el => el.id === id);
 
@@ -60,14 +79,7 @@ exports.getTour =  (req, res) => {
 
 exports.updateTour = (req, res) => {
 
-    const id = Number(req.params.id)
-
-    if(id > tours.length) {
-        return res.status(404).json({
-            status: "fail",
-            message: 'Invalid ID'
-        })
-    }
+    const id = Number(req.params.id);
 
     res.status(200).json({
         status: "success",
@@ -79,14 +91,7 @@ exports.updateTour = (req, res) => {
 
 exports.deleteTour = (req, res) => {
 
-    const id = Number(req.params.id)
-
-    if(id > tours.length) {
-        return res.status(404).json({
-            status: "fail",
-            message: 'Invalid ID'
-        })
-    }
+    const id = Number(req.params.id);
 
     res.status(204).json({
         status: "success",
