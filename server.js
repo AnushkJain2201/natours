@@ -37,6 +37,27 @@ const tourSchema = new mongoose.Schema({
 
 const Tour = mongoose.model('Tour', tourSchema);
 
+const testTour = new Tour({
+    name: 'The Forest Hiker',
+    rating: 4.7,
+    price: 497
+});
+
+const testTour2 = new Tour({
+    name: 'The Park Camper',
+    rating: 4.7,
+    price: 497
+});
+
+// method to save the document in the mongodb
+testTour.save().then((doc) => {
+    console.log(doc);
+}).catch((err) => console.log(err));
+
+testTour2.save().then((doc) => {
+    console.log(doc);
+}).catch((err) => console.log(err));
+
 const port = process.env.port || 3000;
 app.listen(port, () => {
     console.log(`App running on port ${port}...`);
