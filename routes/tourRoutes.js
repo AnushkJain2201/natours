@@ -6,9 +6,6 @@ const {getAllTours, createTour, getTour, updateTour, deleteTour, checkID, checkB
 
 const router = express.Router();
 
-// A param middleware that calls a middlware function that is situated in the controller
-router.param('id', checkID);
-
 router.route('/').get(getAllTours).post(checkBody, createTour);
 
 router.route('/:id').get(getTour).patch(updateTour).delete(deleteTour);
