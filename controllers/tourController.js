@@ -14,18 +14,24 @@ const Tour = require('./../models/tourModel')
 //     next();
 // }
 
-exports.getAllTours = (req, res) => {
+exports.getAllTours = async (req, res) => {
 
-    // res.status(200).json({
-
-    //     status: 'success',
-    //     requestedAt: req.requestTime,
-    //     results: tours.length,
-    //     data: {
-            
-    //         tours
-    //     }
-    // });
+    try{
+        const tours = await Tour.find();
+    
+        res.status(200).json({
+            status: 'success',
+            results: tours.length,
+            data: {
+                tours
+            }
+        });
+    } catch (err) {
+        res.status(404).json({
+            status: 'fail',
+            message: err
+        });
+    }
 };
 
 exports.createTour = async (req, res) => {
@@ -47,22 +53,26 @@ exports.createTour = async (req, res) => {
     }
 };
 
-exports.getTour =  (req, res) => {
-    console.log(req.params);
+exports.getTour = async (req, res) => {
 
-    // const id = Number(req.params.id)
+    try{   
+        const tour = await Tour.findById(req.params.id);
 
-    // const tour = tours.find(el => el.id === id);
+        res.status(200).json({
+            status: 'success',
+            data: {
+                tour
+            }
+        });
 
-    // res.status(200).json({
+    } catch (err) {
+        res.status(400).json({
+            status: 'fail',
+            message: err
+        });
+    }
 
-    //     // According to JSend JSON Formatting
-    //     status: 'success',
-    //     data: {
-    //         tour
-    //     }
-        
-    // });
+    
 };
 
 exports.updateTour = (req, res) => {
