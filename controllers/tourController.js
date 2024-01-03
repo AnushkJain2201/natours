@@ -17,15 +17,28 @@ const Tour = require('./../models/tourModel')
 exports.getAllTours = async (req, res) => {
 
     try{
+        console.log(req.query);
+        // Building the query
+        // 1) Basic Filtering
+
+        // We don't mutate the original object
         const queryObj = {...req.query};
         const excludeFields = ['page', 'sort', 'limit', 'fields'];
 
+        // Deleting the following excluding fields from the object
         excludeFields.forEach(el => delete queryObj[el]);
 
-        // console.log(req.query, queryObj);
+        // 2) Advance filtering
+        // Converting the query object to the string
+        let queryString = JSON.stringify(queryObj);
 
-        // Building the query
-        const query = Tour.find(queryObj);
+        // Calling the replace function to replace operator with corresponding MongoDB operator
+        queryString = queryString.replace(/\b(gte|gt|lte|lt)\b/g, match => `$${match}`);
+
+        // console.log(JSON.parse(queryString));
+
+        let query = Tour.find(JSON.parse(queryString));
+
         // const query =  Tour.find().where('duration').equals(5).where('difficulty').equals('easy');
 
         // Executing the query
