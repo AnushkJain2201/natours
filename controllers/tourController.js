@@ -39,6 +39,15 @@ exports.getAllTours = async (req, res) => {
 
         let query = Tour.find(JSON.parse(queryString));
 
+        // 3) Sorting
+        // If req.query has a sort field than we call the sort method on the query object that we get from the Tour.find() method
+        if(req.query.sort) {
+            const sortBy = req.query.sort.split(",").join(" ");
+            query = query.sort(sortBy);
+        } else {
+            query = query.sort("-createdAt");
+        }
+
         // const query =  Tour.find().where('duration').equals(5).where('difficulty').equals('easy');
 
         // Executing the query
