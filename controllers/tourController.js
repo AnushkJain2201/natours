@@ -48,6 +48,15 @@ exports.getAllTours = async (req, res) => {
             query = query.sort("-createdAt");
         }
 
+        // 4) Field limiting
+        if(req.query.fields) {
+            const fieldsSend = req.query.fields.split(",").join(" ");
+            query = query.select(fieldsSend);
+        } else {
+            // Here we are excluding a field with the name __v as it is created by mongoose to use internally
+            query = query.select('-__v');
+        }
+
         // const query =  Tour.find().where('duration').equals(5).where('difficulty').equals('easy');
 
         // Executing the query
