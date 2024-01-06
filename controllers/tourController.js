@@ -45,7 +45,7 @@ exports.getAllTours = async (req, res) => {
             const sortBy = req.query.sort.split(",").join(" ");
             query = query.sort(sortBy);
         } else {
-            query = query.sort("-createdAt");
+            query = query.sort("_id");
         }
 
         // 4) Field limiting
@@ -55,6 +55,20 @@ exports.getAllTours = async (req, res) => {
         } else {
             // Here we are excluding a field with the name __v as it is created by mongoose to use internally
             query = query.select('-__v');
+        }
+
+        // 5) Pagination
+        const page = req.query.page * 1 || 1;
+        const limit = req.query.limit * 1 || 100;
+        const skip = (page - 1) * limit;
+
+        query = query.skip(skip).limit(limit);
+        
+        if(req.query.page) {
+            // This countDocuments() method return the total number of documnets in Tour model
+            const numTours = await Tour.countDocuments();
+
+            if(skip >= numTours) throw new Error("This page donot exist");
         }
 
         // const query =  Tour.find().where('duration').equals(5).where('difficulty').equals('easy');
