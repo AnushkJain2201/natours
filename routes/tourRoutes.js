@@ -2,9 +2,11 @@ const express = require('express');
 const tourController = require('./../controllers/tourController');
 
 // destructuring to get all the exported handlers
-const {getAllTours, createTour, getTour, updateTour, deleteTour} = tourController;
+const {getAllTours, createTour, getTour, updateTour, deleteTour, aliasTopTours} = tourController;
 
 const router = express.Router();
+
+router.route('/top-5-cheap').get(aliasTopTours, getAllTours);
 
 router.route('/').get(getAllTours).post(createTour);
 
