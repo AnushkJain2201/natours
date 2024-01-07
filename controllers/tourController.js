@@ -181,3 +181,76 @@ exports.deleteTour = async (req, res) => {
         });
     }
 };
+
+exports.getTourStats = async (req, res) => {
+    try {
+        // The aggregate() method will create a pipeline in which we pass an array of stages from which all the documents of Tour model will pass in a defined sequence
+        // This aggegate method returns an aggregate object just like find method returns a query object
+        const stats = await Tour.aggregate([
+            {
+                // Filters the document stream to allow only matching documents to pass unmodified into the next pipeline stage. 
+                $match: { ratingsAverage: { $gte: 4.5 } }
+            },
+
+            {
+                // Groups input documents by a specified identifier expression and applies the accumulator expression(s), if specified, to each group. Consumes all input documents and outputs one document per each distinct group. The output documents only contain the identifier field and, if specified, accumulated fields.
+                // $group: {
+                //     _id: null,
+                //     numTours: { $sum: 1 },
+                //     numRatings: { $sum: '$ratingsQuantity' },
+                //     avgRating: { $avg: '$ratingsAverage' },
+                //     avgPrice: { $avg: '$price' },
+                //     minPrice: { $min: '$price' },
+                //     maxPrice: { $max: '$price' }
+                // }
+
+                $group: {
+                    _id: { $toUpper: '$difficulty' },
+                    numTours: { $sum: 1 },
+                    numRatings: { $sum: '$ratingsQuantity' },
+                    avgRating: { $avg: '$ratingsAverage' },
+                    avgPrice: { $avg: '$price' },
+                    minPrice: { $min: '$price' },
+                    maxPrice: { $max: '$price' }
+                },
+
+                // $group: {
+                //     _id: '$ratingsAverage',
+                //     numTours: { $sum: 1 },
+                //     numRatings: { $sum: '$ratingsQuantity' },
+                //     avgRating: { $avg: '$ratingsAverage' },
+                //     avgPrice: { $avg: '$price' },
+                //     minPrice: { $min: '$price' },
+                //     maxPrice: { $max: '$price' }
+                // }
+
+            },
+
+            {
+                $sort: { avgPrice: 1 }
+            },
+
+            // We can also repeate stages
+            // {
+            //     $match: {
+            //         _id: {
+            //             $ne: 'EASY'
+            //         }
+            //     }
+            // }
+
+        ]);
+
+        res.status(200).json({
+            status: 'success',
+            data: {
+                stats
+            }
+        })
+    } catch(err) {
+        res.status(404).json({
+            status: 'fail',
+            message: err
+        });
+    }
+}
