@@ -246,7 +246,83 @@ exports.getTourStats = async (req, res) => {
             data: {
                 stats
             }
-        })
+        });
+
+    } catch(err) {
+        res.status(404).json({
+            status: 'fail',
+            message: err
+        });
+    }
+}
+
+// Suppose we have to implement a function to calculate the busiest month of the a given year by calculating how many tours start in each of the month of the year.
+exports.getMonthlyPlan = async (req, res) => {
+    try {
+        const year = req.params.year * 1;
+
+        const plan = await Tour.aggregate([
+            {
+                // What this $unwind field will do is deconstruct an array field from the input documents and then output one document for each element of the array
+                // startDates is the field with the array that we want to unwind
+                $unwind: "$startDates"
+            },
+
+            {
+                // Here we will select only those data which is in the year that we passed in the query param
+                $match: {
+                    startDates: {
+                        $gte: new Date(`${year}-01-01`),
+                        $lte: new Date(`${year}-12-31`)
+                    }
+                }
+            },
+
+            {
+                // Here we will group the docs based on their stat month
+                $group: {
+                    // Using a magical operator here, to find the month from the startDates, we will find it in the aggregation pipeline operators DATE EXPRESSION OPERATOR --> the $month operator
+                    _id: { $month: '$startDates' },
+                    numToursStarts: { $sum: 1 },
+
+                    // This push will create an array with all the name of the tours that start that month
+                    tours: { $push: '$name' }
+                }
+            },
+
+            {
+                $addFields: { month: '$_id' }
+            },
+
+            {
+                // This stage helps in getting rid of a field 
+                // If we put the value 0 it will not show up but if we put up the value 1 it will show up
+                $project: {
+                    _id: 0
+                }
+            }, 
+
+            {
+                // Here we are sorting the tours in the descending order based on the num of tours start that year
+                $sort: {
+                    numToursStarts: -1
+                }
+            },
+
+            {
+                // It will limit us to have only 6 docs at last
+                $limit: 6
+            }
+        ]);
+
+        res.status(200).json({
+            status: 'success',
+            results: plan.length,
+            data: {
+                plan
+            }
+        });
+
     } catch(err) {
         res.status(404).json({
             status: 'fail',
