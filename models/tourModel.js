@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const slugify = require('slugify');
 
 const tourSchema = new mongoose.Schema({
     name: {
@@ -64,7 +65,9 @@ const tourSchema = new mongoose.Schema({
         select: false
     },
 
-    startDates: [Date]
+    startDates: [Date],
+
+    slug: String
 }, {
     toJSON: { virtuals: true },
     toObject: { virtuals: true }
@@ -73,7 +76,27 @@ const tourSchema = new mongoose.Schema({
 // The get function because this property will be created each time that we get some dataout of the database. This get function is a getter
 tourSchema.virtual('durationWeeks').get(function() {
     return this.duration / 7;
-})
+});
+
+// This is a pre document middleware, which is gonna run before an actual event.
+// In this case, the event is save , it will run before .save() and .create() but not on insertMany
+tourSchema.pre('save', function(next) {
+
+    // In the save event the this is pointed to the currently processed document
+    // console.log(this);
+    this.slug = slugify(this.name, {lower:true});
+
+    next();
+});
+
+// The post document middleware
+// tourSchema.post('save', function(doc, next) {
+
+//     // Don't have the this keyword here as we have the saved document as doc there.
+//     console.log(doc);
+
+//     next();
+// })
 
 const Tour = mongoose.model('Tour', tourSchema);
 
