@@ -67,7 +67,12 @@ const tourSchema = new mongoose.Schema({
 
     startDates: [Date],
 
-    slug: String
+    slug: String,
+
+    secretTour: {
+        type: Boolean,
+        default: false
+    }
 }, {
     toJSON: { virtuals: true },
     toObject: { virtuals: true }
@@ -97,6 +102,35 @@ tourSchema.pre('save', function(next) {
 
 //     next();
 // })
+
+// Pre find middleware function that will run for both find and findOne query
+tourSchema.pre(/^find/, function(next) {
+    this.find({secretTour: { $ne: true }})
+    this.start = Date.now();
+    next();
+});
+
+// // Pre find query middleware
+// tourSchema.pre('find', function(next) {
+//     this.find({secretTour: { $ne: true }})
+
+//     next();
+// });
+
+// // Pre findOne query middleware
+// tourSchema.pre('findOne', function(next) {
+//     this.find({secretTour: { $ne: true }})
+
+//     next();
+// })
+
+// Post find query middleware
+tourSchema.post(/^find/, function(docs, next) {
+    console.log(`Query took ${Date.now() - this.start} milliseconds`);
+    console.log(docs);
+
+    next();
+})
 
 const Tour = mongoose.model('Tour', tourSchema);
 
