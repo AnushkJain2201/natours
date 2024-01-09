@@ -65,7 +65,15 @@ const tourSchema = new mongoose.Schema({
     },
 
     startDates: [Date]
+}, {
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true }
 });
+
+// The get function because this property will be created each time that we get some dataout of the database. This get function is a getter
+tourSchema.virtual('durationWeeks').get(function() {
+    return this.duration / 7;
+})
 
 const Tour = mongoose.model('Tour', tourSchema);
 
