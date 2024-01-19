@@ -1,6 +1,6 @@
 module.exports = (fn) => {
 
-	// Here we are returning a new anonymous function because that returned function contains the value of the function and that will store in the handler that we are exporting and we are able to pass req, res, next in it because this function is now handled by the Express when we hit any route
+	// Here we are returning a new anonymous function because that returned function contains the value of the function that we want to call and that will store in the handler that we are exporting and we are able to pass req, res, next in it because this function is now handled by the Express when we hit any route
 	return (req, res, next) => {
 
 		// Here, the fn function is an asynchronus function and async functions returns promises, that means we can catch it
