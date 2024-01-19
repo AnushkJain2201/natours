@@ -1,6 +1,8 @@
 const Tour = require('./../models/tourModel');
 const APIFeatures = require('./../utils/apiFeatures');
 
+const catchAsync = require('./../utils/catchAsync');
+
 // A middleware to check whether the body contains the name and the price parameter
 // exports.checkBody = (req, res, next) => {
 //     const {name, price} = req.body;
@@ -11,322 +13,306 @@ const APIFeatures = require('./../utils/apiFeatures');
 //             message: 'Bad Request'
 //         })
 //     }
-    
+
 //     next();
 // }
 
 exports.aliasTopTours = (req, res, next) => {
-    req.query.limit = '5';
-    req.query.sort = '-ratingsAverage,price';
-    req.query.fields = 'name,price,ratingsAverage,summary,difficulty';
+	req.query.limit = '5';
+	req.query.sort = '-ratingsAverage,price';
+	req.query.fields = 'name,price,ratingsAverage,summary,difficulty';
 
-    next();
-}
-
-exports.getAllTours = async (req, res) => {
-
-    try{
-        // Building the query
-        // 1) Basic Filtering
-
-        // We don't mutate the original object
-        // const queryObj = {...req.query};
-        // const excludeFields = ['page', 'sort', 'limit', 'fields'];
-
-        // // Deleting the following excluding fields from the object
-        // excludeFields.forEach(el => delete queryObj[el]);
-
-        // // 2) Advance filtering
-        // // Converting the query object to the string
-        // let queryString = JSON.stringify(queryObj);
-
-        // // Calling the replace function to replace operator with corresponding MongoDB operator
-        // queryString = queryString.replace(/\b(gte|gt|lte|lt)\b/g, match => `$${match}`);
-
-        // // console.log(JSON.parse(queryString));
-
-        // let query = Tour.find(JSON.parse(queryString));
-
-        // 3) Sorting
-        // If req.query has a sort field than we call the sort method on the query object that we get from the Tour.find() method
-        // if(req.query.sort) {
-        //     const sortBy = req.query.sort.split(",").join(" ");
-        //     query = query.sort(sortBy);
-        // } else {
-        //     query = query.sort("_id");
-        // }
-
-        // 4) Field limiting
-        // if(req.query.fields) {
-        //     const fieldsSend = req.query.fields.split(",").join(" ");
-        //     query = query.select(fieldsSend);
-        // } else {
-        //     // Here we are excluding a field with the name __v as it is created by mongoose to use internally
-        //     query = query.select('-__v');
-        // }
-
-        // 5) Pagination
-        // const page = req.query.page * 1 || 1;
-        // const limit = req.query.limit * 1 || 100;
-        // const skip = (page - 1) * limit;
-
-        // query = query.skip(skip).limit(limit);
-        
-        // if(req.query.page) {
-        //     // This countDocuments() method return the total number of documnets in Tour model
-        //     const numTours = await Tour.countDocuments();
-
-        //     if(skip >= numTours) throw new Error("This page donot exist");
-        // }
-
-        // const query =  Tour.find().where('duration').equals(5).where('difficulty').equals('easy');
-
-        // Executing the query
-        const features = new APIFeatures(Tour.find(), req.query).filter().sort().limitFields().paginate();
-
-        const tours = await features.query;
-    
-        // Send response
-        res.status(200).json({
-            status: 'success',
-            results: tours.length,
-            data: {
-                tours
-            }
-        });
-    } catch (err) {
-        res.status(404).json({
-            status: 'fail',
-            message: err
-        });
-    }
+	next();
 };
 
-exports.createTour = async (req, res) => {
+exports.getAllTours = catchAsync(async (req, res, next) => {
+	const features = new APIFeatures(Tour.find(), req.query)
+		.filter()
+		.sort()
+		.limitFields()
+		.paginate();
 
-    try{
-        const newTour = await Tour.create(req.body);
-        
-        res.status(201).json({
-            status: 'success',
-            data: {
-                tour: newTour
-            }
-        });
-    } catch (err) {
-        res.status(400).json({
-            status: 'fail',
-            message: err
-        })
-    }
-};
+	const tours = await features.query;
 
-exports.getTour = async (req, res) => {
+	// Send response
+	res.status(200).json({
+		status: 'success',
+		results: tours.length,
+		data: {
+			tours,
+		},
+	})
+});
+// try {
+// 	// Building the query
+// 	// 1) Basic Filtering
 
-    try{   
-        const tour = await Tour.findById(req.params.id);
+// 	// We don't mutate the original object
+// 	// const queryObj = {...req.query};
+// 	// const excludeFields = ['page', 'sort', 'limit', 'fields'];
 
-        res.status(200).json({
-            status: 'success',
-            data: {
-                tour
-            }
-        });
+// 	// // Deleting the following excluding fields from the object
+// 	// excludeFields.forEach(el => delete queryObj[el]);
 
-    } catch (err) {
-        res.status(400).json({
-            status: 'fail',
-            message: err
-        });
-    }
+// 	// // 2) Advance filtering
+// 	// // Converting the query object to the string
+// 	// let queryString = JSON.stringify(queryObj);
 
-    
-};
+// 	// // Calling the replace function to replace operator with corresponding MongoDB operator
+// 	// queryString = queryString.replace(/\b(gte|gt|lte|lt)\b/g, match => `$${match}`);
 
-exports.updateTour = async (req, res) => {
+// 	// // console.log(JSON.parse(queryString));
 
-    try {
-        const updatedTour = await Tour.findByIdAndUpdate(req.params.id, req.body, {
-            new: true,
-            runValidators: true
-        }); 
+// 	// let query = Tour.find(JSON.parse(queryString));
 
-        res.status(200).json({
-            status: "success",
-            data: {
-                tour: updatedTour
-            }
-        });
-    } catch (err) {
-        res.status(404).json({
-            status: 'fail',
-            message: err
-        });
-    }
-};
+// 	// 3) Sorting
+// 	// If req.query has a sort field than we call the sort method on the query object that we get from the Tour.find() method
+// 	// if(req.query.sort) {
+// 	//     const sortBy = req.query.sort.split(",").join(" ");
+// 	//     query = query.sort(sortBy);
+// 	// } else {
+// 	//     query = query.sort("_id");
+// 	// }
 
-exports.deleteTour = async (req, res) => {
+// 	// 4) Field limiting
+// 	// if(req.query.fields) {
+// 	//     const fieldsSend = req.query.fields.split(",").join(" ");
+// 	//     query = query.select(fieldsSend);
+// 	// } else {
+// 	//     // Here we are excluding a field with the name __v as it is created by mongoose to use internally
+// 	//     query = query.select('-__v');
+// 	// }
 
-    try {
-        await Tour.findByIdAndDelete(req.params.id);
+// 	// 5) Pagination
+// 	// const page = req.query.page * 1 || 1;
+// 	// const limit = req.query.limit * 1 || 100;
+// 	// const skip = (page - 1) * limit;
 
-        res.status(204).json({
-            status: 'success',
-            data: null
-        });
-    } catch (err) {
-        res.status(404).json({
-            status: 'fail',
-            message: err
-        });
-    }
-};
+// 	// query = query.skip(skip).limit(limit);
 
-exports.getTourStats = async (req, res) => {
-    try {
-        // The aggregate() method will create a pipeline in which we pass an array of stages from which all the documents of Tour model will pass in a defined sequence
-        // This aggegate method returns an aggregate object just like find method returns a query object
-        const stats = await Tour.aggregate([
-            {
-                // Filters the document stream to allow only matching documents to pass unmodified into the next pipeline stage. 
-                $match: { ratingsAverage: { $gte: 4.5 } }
-            },
+// 	// if(req.query.page) {
+// 	//     // This countDocuments() method return the total number of documnets in Tour model
+// 	//     const numTours = await Tour.countDocuments();
 
-            {
-                // Groups input documents by a specified identifier expression and applies the accumulator expression(s), if specified, to each group. Consumes all input documents and outputs one document per each distinct group. The output documents only contain the identifier field and, if specified, accumulated fields.
-                // $group: {
-                //     _id: null,
-                //     numTours: { $sum: 1 },
-                //     numRatings: { $sum: '$ratingsQuantity' },
-                //     avgRating: { $avg: '$ratingsAverage' },
-                //     avgPrice: { $avg: '$price' },
-                //     minPrice: { $min: '$price' },
-                //     maxPrice: { $max: '$price' }
-                // }
+// 	//     if(skip >= numTours) throw new Error("This page donot exist");
+// 	// }
 
-                $group: {
-                    _id: { $toUpper: '$difficulty' },
-                    numTours: { $sum: 1 },
-                    numRatings: { $sum: '$ratingsQuantity' },
-                    avgRating: { $avg: '$ratingsAverage' },
-                    avgPrice: { $avg: '$price' },
-                    minPrice: { $min: '$price' },
-                    maxPrice: { $max: '$price' }
-                },
+// 	// const query =  Tour.find().where('duration').equals(5).where('difficulty').equals('easy');
 
-                // $group: {
-                //     _id: '$ratingsAverage',
-                //     numTours: { $sum: 1 },
-                //     numRatings: { $sum: '$ratingsQuantity' },
-                //     avgRating: { $avg: '$ratingsAverage' },
-                //     avgPrice: { $avg: '$price' },
-                //     minPrice: { $min: '$price' },
-                //     maxPrice: { $max: '$price' }
-                // }
+// 	// Executing the query
+// 	const features = new APIFeatures(Tour.find(), req.query)
+// 		.filter()
+// 		.sort()
+// 		.limitFields()
+// 		.paginate();
 
-            },
+// 	const tours = await features.query;
 
-            {
-                $sort: { avgPrice: 1 }
-            },
+// 	// Send response
+// 	res.status(200).json({
+// 		status: 'success',
+// 		results: tours.length,
+// 		data: {
+// 			tours,
+// 		},
+// 	});
+// } catch (err) {
+// 	res.status(404).json({
+// 		status: 'fail',
+// 		message: err,
+// 	});
+// }
 
-            // We can also repeate stages
-            // {
-            //     $match: {
-            //         _id: {
-            //             $ne: 'EASY'
-            //         }
-            //     }
-            // }
+// Now, we are writing another parameter here that is next because we need next function to pass error that can be handled in the global error middleware
+exports.createTour = catchAsync(async (req, res, next) => {
+	const newTour = await Tour.create(req.body);
 
-        ]);
+	res.status(201).json({
+		status: 'success',
+		data: {
+			tour: newTour,
+		},
+	});
 
-        res.status(200).json({
-            status: 'success',
-            data: {
-                stats
-            }
-        });
+	// try{
+	//     const newTour = await Tour.create(req.body);
 
-    } catch(err) {
-        res.status(404).json({
-            status: 'fail',
-            message: err
-        });
-    }
-}
+	//     res.status(201).json({
+	//         status: 'success',
+	//         data: {
+	//             tour: newTour
+	//         }
+	//     });
+	// } catch (err) {
+	//     res.status(400).json({
+	//         status: 'fail',
+	//         message: err
+	//     })
+	// }
+});
+
+exports.getTour = catchAsync(async (req, res, next) => {
+	const tour = await Tour.findById(req.params.id);
+
+	res.status(200).json({
+		status: 'success',
+		data: {
+			tour,
+		},
+	});
+
+});
+
+exports.updateTour = catchAsync(async (req, res, next) => {
+	const updatedTour = await Tour.findByIdAndUpdate(req.params.id, req.body, {
+		new: true,
+		runValidators: true,
+	});
+
+	res.status(200).json({
+		status: 'success',
+		data: {
+			tour: updatedTour,
+		},
+	});
+});
+
+exports.deleteTour = catchAsync(async (req, res, next) => {
+	await Tour.findByIdAndDelete(req.params.id);
+
+	res.status(204).json({
+		status: 'success',
+		data: null,
+	});
+});
+
+exports.getTourStats = catchAsync(async (req, res, next) => {
+	// The aggregate() method will create a pipeline in which we pass an array of stages from which all the documents of Tour model will pass in a defined sequence
+	// This aggegate method returns an aggregate object just like find method returns a query object
+	const stats = await Tour.aggregate([
+		{
+			// Filters the document stream to allow only matching documents to pass unmodified into the next pipeline stage.
+			$match: { ratingsAverage: { $gte: 4.5 } },
+		},
+
+		{
+			// Groups input documents by a specified identifier expression and applies the accumulator expression(s), if specified, to each group. Consumes all input documents and outputs one document per each distinct group. The output documents only contain the identifier field and, if specified, accumulated fields.
+			// $group: {
+			//     _id: null,
+			//     numTours: { $sum: 1 },
+			//     numRatings: { $sum: '$ratingsQuantity' },
+			//     avgRating: { $avg: '$ratingsAverage' },
+			//     avgPrice: { $avg: '$price' },
+			//     minPrice: { $min: '$price' },
+			//     maxPrice: { $max: '$price' }
+			// }
+
+			$group: {
+				_id: { $toUpper: '$difficulty' },
+				numTours: { $sum: 1 },
+				numRatings: { $sum: '$ratingsQuantity' },
+				avgRating: { $avg: '$ratingsAverage' },
+				avgPrice: { $avg: '$price' },
+				minPrice: { $min: '$price' },
+				maxPrice: { $max: '$price' },
+			},
+
+			// $group: {
+			//     _id: '$ratingsAverage',
+			//     numTours: { $sum: 1 },
+			//     numRatings: { $sum: '$ratingsQuantity' },
+			//     avgRating: { $avg: '$ratingsAverage' },
+			//     avgPrice: { $avg: '$price' },
+			//     minPrice: { $min: '$price' },
+			//     maxPrice: { $max: '$price' }
+			// }
+		},
+
+		{
+			$sort: { avgPrice: 1 },
+		},
+
+		// We can also repeate stages
+		// {
+		//     $match: {
+		//         _id: {
+		//             $ne: 'EASY'
+		//         }
+		//     }
+		// }
+	]);
+
+	res.status(200).json({
+		status: 'success',
+		data: {
+			stats,
+		},
+	});
+});
 
 // Suppose we have to implement a function to calculate the busiest month of the a given year by calculating how many tours start in each of the month of the year.
-exports.getMonthlyPlan = async (req, res) => {
-    try {
-        const year = req.params.year * 1;
+exports.getMonthlyPlan = catchAsync(async (req, res, next) => {
+	const year = req.params.year * 1;
 
-        const plan = await Tour.aggregate([
-            {
-                // What this $unwind field will do is deconstruct an array field from the input documents and then output one document for each element of the array
-                // startDates is the field with the array that we want to unwind
-                $unwind: "$startDates"
-            },
+		const plan = await Tour.aggregate([
+			{
+				// What this $unwind field will do is deconstruct an array field from the input documents and then output one document for each element of the array
+				// startDates is the field with the array that we want to unwind
+				$unwind: '$startDates',
+			},
 
-            {
-                // Here we will select only those data which is in the year that we passed in the query param
-                $match: {
-                    startDates: {
-                        $gte: new Date(`${year}-01-01`),
-                        $lte: new Date(`${year}-12-31`)
-                    }
-                }
-            },
+			{
+				// Here we will select only those data which is in the year that we passed in the query param
+				$match: {
+					startDates: {
+						$gte: new Date(`${year}-01-01`),
+						$lte: new Date(`${year}-12-31`),
+					},
+				},
+			},
 
-            {
-                // Here we will group the docs based on their stat month
-                $group: {
-                    // Using a magical operator here, to find the month from the startDates, we will find it in the aggregation pipeline operators DATE EXPRESSION OPERATOR --> the $month operator
-                    _id: { $month: '$startDates' },
-                    numToursStarts: { $sum: 1 },
+			{
+				// Here we will group the docs based on their stat month
+				$group: {
+					// Using a magical operator here, to find the month from the startDates, we will find it in the aggregation pipeline operators DATE EXPRESSION OPERATOR --> the $month operator
+					_id: { $month: '$startDates' },
+					numToursStarts: { $sum: 1 },
 
-                    // This push will create an array with all the name of the tours that start that month
-                    tours: { $push: '$name' }
-                }
-            },
+					// This push will create an array with all the name of the tours that start that month
+					tours: { $push: '$name' },
+				},
+			},
 
-            {
-                $addFields: { month: '$_id' }
-            },
+			{
+				$addFields: { month: '$_id' },
+			},
 
-            {
-                // This stage helps in getting rid of a field 
-                // If we put the value 0 it will not show up but if we put up the value 1 it will show up
-                $project: {
-                    _id: 0
-                }
-            }, 
+			{
+				// This stage helps in getting rid of a field
+				// If we put the value 0 it will not show up but if we put up the value 1 it will show up
+				$project: {
+					_id: 0,
+				},
+			},
 
-            {
-                // Here we are sorting the tours in the descending order based on the num of tours start that year
-                $sort: {
-                    numToursStarts: -1
-                }
-            },
+			{
+				// Here we are sorting the tours in the descending order based on the num of tours start that year
+				$sort: {
+					numToursStarts: -1,
+				},
+			},
 
-            {
-                // It will limit us to have only 6 docs at last
-                $limit: 6
-            }
-        ]);
+			{
+				// It will limit us to have only 6 docs at last
+				$limit: 6,
+			},
+		]);
 
-        res.status(200).json({
-            status: 'success',
-            results: plan.length,
-            data: {
-                plan
-            }
-        });
-
-    } catch(err) {
-        res.status(404).json({
-            status: 'fail',
-            message: err
-        });
-    }
-}
+		res.status(200).json({
+			status: 'success',
+			results: plan.length,
+			data: {
+				plan,
+			},
+		});
+});
