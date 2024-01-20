@@ -9,6 +9,16 @@ const handleCastErrorDB = (err) => {
 
 }
 
+const handleDuplicateFieldsDB = (err) => {
+
+	// HEre we will use the regex to extract the duplicate value from the errmsg attribute of err 
+	const value = err.errmsg.match(/(["'])(\\?.)*?\1/)[0];
+	// const message = `Duplicate field value: ${err.keyValue[keys[0]]} . Please use another value!`;
+	const message = `Duplicate field value: ${value}. Please use another value!`;
+
+	return new AppError(message, 400);
+}
+
 const sendErrorDev = (err, res) => {
 	res.status(err.statusCode).json({
 		status: err.status,
@@ -51,7 +61,13 @@ module.exports = (err, req, res, next) => {
 		if(err.name === 'CastError') {
 
 			// here, we are creating a function that will mark this CastError as an operation error and it also returns an error with Operational as true
-			error = handleCastErrorDB(error);
+			error = handleCastErrorDB(err);
+		}
+
+		// Handler for the duplicate fields
+		// console.log(err.code === 11000);
+		if(err.code === 11000) {
+			error = handleDuplicateFieldsDB(err);
 		}
 
 
@@ -59,4 +75,4 @@ module.exports = (err, req, res, next) => {
 	}
 
 
-};
+}
