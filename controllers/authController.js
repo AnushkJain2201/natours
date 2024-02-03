@@ -1,3 +1,5 @@
+// util is an inbuilt module in express and it has a function promisify that Takes a function following the common error-first callback style, i.e. taking a (err, value) => ... callback as the last argument, and returns a version that returns promises.
+const {promisify} = require('util');
 const jwt = require('jsonwebtoken');
 const User = require('./../models/userModel');
 
@@ -60,3 +62,44 @@ exports.login = catchAsync(async (req, res, next) => {
         token
     });
 });
+
+exports.protect = catchAsync(async (req, res, next) => {
+
+    // The standard for sending token back with the request is that we always use the name of the header as authorization and the value of that header will be Bearer <JWT Token>
+    // We can get the headers in the Express as req.headers
+
+    // 1) Get the token and check if its exist
+    let token;
+    if(req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+        token = req.headers.authorization.split(' ')[1];
+    }
+    
+    // If token is undefined we will return an error
+    if(!token) {
+        return next(new AppError('You are not logged in! Please login to get access', 401));
+    }
+
+    // 2) Verification token
+    // The last parenthesis contains the parameters of the verify function
+    // decoded contains the object with the id that we used during the creation of the token
+    const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
+    // console.log(decoded);
+    // If the payload is tampered, it will throw JsonWebTokenError, that we will handle in the global error handler in errorController.js
+    // Another error occurred if user tries to access route with the expired token, it wil throw TokenExpiredError, handled in global error handler
+
+
+    // 3) Check if user still exists
+    const currentUser = await User.findById(decoded.id);
+    if(!currentUser) {
+        return next(new AppError('The user belonging to this token donot exist!', 401));
+    }
+
+    // 4) Check if user changed password after the token was issued
+    if(currentUser.changePasswordAfter(decoded.iat)) {
+        return next(new AppError('User recently changed Password! Please log in again', 401));
+    }
+
+    // Grant access to the protected route
+    req.user = currentUser;
+    next();
+})
