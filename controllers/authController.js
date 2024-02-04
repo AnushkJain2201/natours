@@ -1,5 +1,5 @@
 // util is an inbuilt module in express and it has a function promisify that Takes a function following the common error-first callback style, i.e. taking a (err, value) => ... callback as the last argument, and returns a version that returns promises.
-const {promisify} = require('util');
+const { promisify } = require('util');
 const jwt = require('jsonwebtoken');
 const User = require('./../models/userModel');
 
@@ -71,12 +71,12 @@ exports.protect = catchAsync(async (req, res, next) => {
 
     // 1) Get the token and check if its exist
     let token;
-    if(req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
         token = req.headers.authorization.split(' ')[1];
     }
-    
+
     // If token is undefined we will return an error
-    if(!token) {
+    if (!token) {
         return next(new AppError('You are not logged in! Please login to get access', 401));
     }
 
@@ -91,12 +91,12 @@ exports.protect = catchAsync(async (req, res, next) => {
 
     // 3) Check if user still exists
     const currentUser = await User.findById(decoded.id);
-    if(!currentUser) {
+    if (!currentUser) {
         return next(new AppError('The user belonging to this token donot exist!', 401));
     }
 
     // 4) Check if user changed password after the token was issued
-    if(currentUser.changedPasswordAfter(decoded.iat)) {
+    if (currentUser.changedPasswordAfter(decoded.iat)) {
         return next(new AppError('User recently changed Password! Please log in again', 401));
     }
 
@@ -109,10 +109,31 @@ exports.protect = catchAsync(async (req, res, next) => {
 exports.restrictTo = (...roles) => {
     return (req, res, next) => {
         // roles is an array in this case ['admin', 'lead-guide']
-        if(!roles.includes(req.user.role)) {
+        if (!roles.includes(req.user.role)) {
             return next(new AppError('You do not have permission to perform this action', 403));
         }
 
         next();
     }
+}
+
+exports.forgotPassword = catchAsync(async (req, res, next) => {
+    // 1) get user based on posted email 
+    const user = await User.findOne({ email: req.body.email });
+
+    if(!user) {
+        return next(new AppError("There is no user with that email address", 404));
+    }
+
+    // 2) generate the random reset token
+    const resetToken = user.createPasswordResetToken();
+
+    await user.save({validateBeforeSave: false});
+
+
+    // 3) send it to user's email
+});
+
+exports.resetPassword = (req, res, next) => {
+
 }

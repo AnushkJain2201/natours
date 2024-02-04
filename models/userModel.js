@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const validator = require('validator');
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
 
 const userSchema = new mongoose.Schema({
     name: {
@@ -47,7 +48,11 @@ const userSchema = new mongoose.Schema({
         }
     },
 
-    passwordChangedAt: Date
+    passwordChangedAt: Date,
+
+    passwordResetToken: String,
+
+    passwordResetExpires: Date
 });
 
 userSchema.pre('save', async function (next) {
@@ -65,23 +70,40 @@ userSchema.pre('save', async function (next) {
 });
 
 // Creating an instance method that will be available with all the documents of this schema
-userSchema.methods.correctPassword = async function(candidatePassword, userPassword) {
+userSchema.methods.correctPassword = async function (candidatePassword, userPassword) {
     return await bcrypt.compare(candidatePassword, userPassword);
 }
 
-userSchema.methods.changedPasswordAfter = function(JWTTimestamp) {
+userSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
     if (this.passwordChangedAt) {
-      const changedTimestamp = parseInt(
-        this.passwordChangedAt.getTime() / 1000,
-        10
-      );
-  
-      return JWTTimestamp < changedTimestamp;
+        const changedTimestamp = parseInt(
+            this.passwordChangedAt.getTime() / 1000,
+            10
+        );
+
+        return JWTTimestamp < changedTimestamp;
     }
-  
+
     // False means NOT changed
     return false;
-  };
+};
+
+userSchema.methods.createPasswordResetToken = function() {
+
+    // creating a random token of 32 characters and converting it into the hexadecimal String. and just like a password, we never store reset token directly in database we have to hash it and instead of using bycryptjs to do it we are using built in crypto module because we don't need that strong encryption
+    const resetToken = crypto.randomBytes(32).toString('hex');
+
+    // just somemethods for hashing
+    this.passwordResetToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+
+    console.log({resetToken}, this.passwordResetToken)
+
+    // Ten minutes from the current time
+    this.passwordResetExpires = Date.now() + 10*60*1000;
+
+    // Returning plain simple resetToken so that we can send it with the email
+    return resetToken;
+}
 
 const User = mongoose.model('user', userSchema);
 
