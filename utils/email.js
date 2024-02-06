@@ -9,7 +9,7 @@ const sendEmail = async options => {
         // Uncommment out service if using outlook
         // service: 'outlook',
         
-        // Comment host and port if using mailtrap
+        // Comment host and port if using outlook
         host: process.env.EMAIL_HOST,
         port: process.env.EMAIL_PORT,
         auth: {

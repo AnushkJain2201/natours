@@ -69,6 +69,18 @@ userSchema.pre('save', async function (next) {
     next();
 });
 
+userSchema.pre('save', async function(next) {
+
+    // isModified and isNew are the functions and property provided by the mongoose
+    if(!this.isModified('password') || this.isNew) return next();
+
+    // In practice sometimes a small problem happens. And that problem is sometimes saving to the database is a bit slower than issuing the JSON web token, making it so the changed password timestamp is sometimes set a bit after the JSON web token has been created. We can fix that by substracting one second
+    this.passwordChangedAt = Date.now() - 1000;
+
+    next();
+
+})
+
 // Creating an instance method that will be available with all the documents of this schema
 userSchema.methods.correctPassword = async function (candidatePassword, userPassword) {
     return await bcrypt.compare(candidatePassword, userPassword);
