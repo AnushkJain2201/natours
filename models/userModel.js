@@ -52,7 +52,13 @@ const userSchema = new mongoose.Schema({
 
     passwordResetToken: String,
 
-    passwordResetExpires: Date
+    passwordResetExpires: Date,
+
+    active: {
+        type: Boolean,
+        default: true,
+        select: false
+    }
 });
 
 userSchema.pre('save', async function (next) {
@@ -79,7 +85,15 @@ userSchema.pre('save', async function(next) {
 
     next();
 
-})
+});
+
+// query middleware so that in getting all the users we donot select the ones that are inactive
+userSchema.pre(/^find/, function(next) {
+    // this  keyword will point to the current query
+    this.find({active: {$ne: false}});
+
+    next();
+});
 
 // Creating an instance method that will be available with all the documents of this schema
 userSchema.methods.correctPassword = async function (candidatePassword, userPassword) {
