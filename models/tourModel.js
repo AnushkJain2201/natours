@@ -94,7 +94,44 @@ const tourSchema = new mongoose.Schema({
     secretTour: {
         type: Boolean,
         default: false
-    }
+    },
+
+    // Here in the startLocation it is the nested object not the options object like the others, for storing the geospatial data we need to create an another object
+    startLocation: {
+        // GeoJSON in order to specify geospatial data
+        type: {
+            type: String,
+
+            // The default value is of point, which can also be lines, or polygons etc
+            default: 'Point',
+            enum: [
+                'Point'
+            ]
+        },
+
+        // Here we also needed array of numbers in the coordinates
+        coordinates: [Number],
+        address: String,
+        description: String
+    },
+
+    // Now here we want multiple locations to be embedded, so we create an array, then created an objec to store multiple data
+    // To specify an array, it will basically create multiple documents inside of the parent document
+    locations: [
+        {
+            type: {
+                type: String,
+                default: 'Point',
+                enum: [
+                    'Point'
+                ]
+            },
+            coordinates: [Number],
+            address: String,
+            description: String,
+            day: Number
+        }
+    ]
 }, {
     toJSON: { virtuals: true },
     toObject: { virtuals: true }
