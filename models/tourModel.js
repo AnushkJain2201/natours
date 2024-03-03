@@ -2,6 +2,8 @@ const mongoose = require('mongoose');
 const slugify = require('slugify');
 // const validator = require('validator');
 
+const User = require("./userModel");
+
 const tourSchema = new mongoose.Schema({
     name: {
         type: String,
@@ -131,7 +133,9 @@ const tourSchema = new mongoose.Schema({
             description: String,
             day: Number
         }
-    ]
+    ],
+
+    guides: Array
 }, {
     toJSON: { virtuals: true },
     toObject: { virtuals: true }
@@ -152,6 +156,16 @@ tourSchema.pre('save', function(next) {
 
     next();
 });
+
+tourSchema.pre('save', async function(next) {
+
+    // this.guides here will be the array of all the user ids that are giudes
+    // guidesPromises will contain all the promises that is caused by findById
+    const guidesPromises = this.guides.map(async id => await User.findById(id));
+    this.guides = await Promise.all(guidesPromises);
+
+    next();
+})
 
 // The post document middleware
 // tourSchema.post('save', function(doc, next) {
