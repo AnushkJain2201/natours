@@ -27,7 +27,7 @@ const tourSchema = new mongoose.Schema({
     },
 
     difficulty: {
-        type: String, 
+        type: String,
         require: [true, "A tour must have a difficulty"],
         enum: {
             values: ['easy', 'medium', 'difficult'],
@@ -55,13 +55,13 @@ const tourSchema = new mongoose.Schema({
     priceDiscount: {
         type: Number,
         validate: {
-            validator: function(val) {
+            validator: function (val) {
 
                 // this here will point to the current document when we are creating a new document so this function here is not going to work on update
                 return val < this.price;
             },
             message: 'Discount price ({VALUE}) should be below the regular price'
-            
+
         }
     },
 
@@ -135,37 +135,42 @@ const tourSchema = new mongoose.Schema({
         }
     ],
 
-    guides: Array
+    guides: [
+        {
+            type: mongoose.Schema.ObjectId,
+            ref: "user"
+        }
+    ]
 }, {
     toJSON: { virtuals: true },
     toObject: { virtuals: true }
 });
 
 // The get function because this property will be created each time that we get some dataout of the database. This get function is a getter
-tourSchema.virtual('durationWeeks').get(function() {
+tourSchema.virtual('durationWeeks').get(function () {
     return this.duration / 7;
 });
 
 // This is a pre document middleware, which is gonna run before an actual event.
 // In this case, the event is save , it will run before .save() and .create() but not on insertMany
-tourSchema.pre('save', function(next) {
+tourSchema.pre('save', function (next) {
 
     // In the save event the this is pointed to the currently processed document
     // console.log(this);
-    this.slug = slugify(this.name, {lower:true});
+    this.slug = slugify(this.name, { lower: true });
 
     next();
 });
 
-tourSchema.pre('save', async function(next) {
+// tourSchema.pre('save', async function(next) {
 
-    // this.guides here will be the array of all the user ids that are giudes
-    // guidesPromises will contain all the promises that is caused by findById
-    const guidesPromises = this.guides.map(async id => await User.findById(id));
-    this.guides = await Promise.all(guidesPromises);
+//     // this.guides here will be the array of all the user ids that are giudes
+//     // guidesPromises will contain all the promises that is caused by findById
+//     const guidesPromises = this.guides.map(async id => await User.findById(id));
+//     this.guides = await Promise.all(guidesPromises);
 
-    next();
-})
+//     next();
+// })
 
 // The post document middleware
 // tourSchema.post('save', function(doc, next) {
@@ -177,9 +182,21 @@ tourSchema.pre('save', async function(next) {
 // })
 
 // Pre find middleware function that will run for both find and findOne query
-tourSchema.pre(/^find/, function(next) {
-    this.find({secretTour: { $ne: true }})
+tourSchema.pre(/^find/, function (next) {
+    this.find({ secretTour: { $ne: true } })
     this.start = Date.now();
+    next();
+});
+
+tourSchema.pre(/^find/, function (next) {
+    this.populate({
+        // here we can select the fields that we want to populate if we don't want that we will just write 'guides' in the populate function, and that will get all the fields
+        path: 'guides',
+
+        // here, we are deselecting the __v and passwordChangedAt field
+        select: '-__v -passwordChangedAt'
+    });
+
     next();
 });
 
@@ -198,13 +215,13 @@ tourSchema.pre(/^find/, function(next) {
 // })
 
 // Post find query middleware
-tourSchema.post(/^find/, function(docs, next) {
+tourSchema.post(/^find/, function (docs, next) {
     console.log(`Query took ${Date.now() - this.start} milliseconds`);
     next();
 });
 
 // Aggregation middleware
-tourSchema.pre('aggregate', function(next) {
+tourSchema.pre('aggregate', function (next) {
     // Here this points towards current aggregation object and this.pipeline will return the array of all the pipeline stages
     console.log(this.pipeline());
 
@@ -212,6 +229,8 @@ tourSchema.pre('aggregate', function(next) {
     this.pipeline().unshift({ $match: { secretTour: { $ne: true } } });
     next();
 })
+
+
 
 const Tour = mongoose.model('Tour', tourSchema);
 
