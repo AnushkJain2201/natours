@@ -140,7 +140,7 @@ const tourSchema = new mongoose.Schema({
             type: mongoose.Schema.ObjectId,
             ref: "user"
         }
-    ]
+    ],
 }, {
     toJSON: { virtuals: true },
     toObject: { virtuals: true }
@@ -149,6 +149,17 @@ const tourSchema = new mongoose.Schema({
 // The get function because this property will be created each time that we get some dataout of the database. This get function is a getter
 tourSchema.virtual('durationWeeks').get(function () {
     return this.duration / 7;
+});
+
+// virtual populate
+tourSchema.virtual('reviews', {
+    ref: 'Review',
+
+    // foreignField is the field in the child where reference to the parent model is stored
+    foreignField: 'tour',
+
+    // localField is the field in the parent model which is stored in the child model
+    localField: '_id'
 });
 
 // This is a pre document middleware, which is gonna run before an actual event.
