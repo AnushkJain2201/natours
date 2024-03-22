@@ -28,24 +28,8 @@ exports.aliasTopTours = (req, res, next) => {
 	next();
 };
 
-exports.getAllTours = catchAsync(async (req, res, next) => {
-	const features = new APIFeatures(Tour.find(), req.query)
-		.filter()
-		.sort()
-		.limitFields()
-		.paginate();
+exports.getAllTours = factory.getAll(Tour);
 
-	const tours = await features.query;
-
-	// Send response
-	res.status(200).json({
-		status: 'success',
-		results: tours.length,
-		data: {
-			tours,
-		},
-	});
-});
 // try {
 // 	// Building the query
 // 	// 1) Basic Filtering
@@ -129,23 +113,7 @@ exports.getAllTours = catchAsync(async (req, res, next) => {
 // Now, we are writing another parameter here that is next because we need next function to pass error that can be handled in the global error middleware
 exports.createTour = factory.createOne(Tour);
 
-exports.getTour = catchAsync(async (req, res, next) => {
-	const tour = await Tour.findById(req.params.id).populate('reviews');
-
-	// Behind the scene the populate function also create a query, so this will affect the performance of the application
-
-	// If there is no tour it means it is null and in js null is fallsy value that's why we used ! here
-	if (!tour) {
-		return next(new AppError('No tour found with that id', 404));
-	}
-
-	res.status(200).json({
-		status: 'success',
-		data: {
-			tour,
-		},
-	});
-});
+exports.getTour = factory.getOne(Tour, {path: 'reviews'});
 
 exports.updateTour = factory.updateOne(Tour);
 
