@@ -127,32 +127,7 @@ exports.getAllTours = catchAsync(async (req, res, next) => {
 // }
 
 // Now, we are writing another parameter here that is next because we need next function to pass error that can be handled in the global error middleware
-exports.createTour = catchAsync(async (req, res, next) => {
-	const newTour = await Tour.create(req.body);
-
-	res.status(201).json({
-		status: 'success',
-		data: {
-			tour: newTour,
-		},
-	});
-
-	// try{
-	//     const newTour = await Tour.create(req.body);
-
-	//     res.status(201).json({
-	//         status: 'success',
-	//         data: {
-	//             tour: newTour
-	//         }
-	//     });
-	// } catch (err) {
-	//     res.status(400).json({
-	//         status: 'fail',
-	//         message: err
-	//     })
-	// }
-});
+exports.createTour = factory.createOne(Tour);
 
 exports.getTour = catchAsync(async (req, res, next) => {
 	const tour = await Tour.findById(req.params.id).populate('reviews');
@@ -172,23 +147,25 @@ exports.getTour = catchAsync(async (req, res, next) => {
 	});
 });
 
-exports.updateTour = catchAsync(async (req, res, next) => {
-	const updatedTour = await Tour.findByIdAndUpdate(req.params.id, req.body, {
-		new: true,
-		runValidators: true,
-	});
+exports.updateTour = factory.updateOne(Tour);
 
-	if (!updatedTour) {
-		return next(new AppError('No tour found with that id', 404));
-	}
+// exports.updateTour = catchAsync(async (req, res, next) => {
+// 	const updatedTour = await Tour.findByIdAndUpdate(req.params.id, req.body, {
+// 		new: true,
+// 		runValidators: true,
+// 	});
 
-	res.status(200).json({
-		status: 'success',
-		data: {
-			tour: updatedTour,
-		},
-	});
-});
+// 	if (!updatedTour) {
+// 		return next(new AppError('No tour found with that id', 404));
+// 	}
+
+// 	res.status(200).json({
+// 		status: 'success',
+// 		data: {
+// 			tour: updatedTour,
+// 		},
+// 	});
+// });
 
 exports.deleteTour = factory.deleteOne(Tour);
 
