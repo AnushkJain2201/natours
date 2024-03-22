@@ -5,9 +5,10 @@ const authController = require('./../controllers/authController');
 const {getAllReviews, createReview} = reviewController;
 const { protect, restrictTo } = authController;
 
-const router = express.Router();
+// Here, we are giving options of mergeParams to true in order for reviewRoutes to get access to the tourId param in the nested URL
+const router = express.Router({ mergeParams: true });
 
-router.route('/').get(getAllReviews);
+router.route('/').get(getAllReviews).post(protect, restrictTo('user'), createReview);
 router.route('/create').post(protect, restrictTo('user'), createReview);
 
 module.exports = router;
