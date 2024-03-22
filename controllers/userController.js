@@ -58,6 +58,13 @@ exports.createUser = (req, res) => {
     })
 }
 
+exports.getMe = (req, res, next) => {
+
+    // here we are creating a middleware that will add the user id into the params.id so that is will be used by the getUser function in order to get the info about the current user
+    req.params.id = req.user.id;
+    next();
+}
+
 exports.getAllUsers = factory.getAll(User);
 
 exports.getUser = factory.getOne(User);
