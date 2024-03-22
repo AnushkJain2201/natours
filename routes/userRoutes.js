@@ -16,10 +16,16 @@ router.post('/login', login);
 router.post('/forgotPassword', forgotPassword);
 router.patch('/resetPassword/:token', resetPassword);
 
-router.patch('/updateMyPassword', protect, updatePassword);
+// What this will do is protect every route that come after this
+router.use(protect);
 
-router.patch('/updateMe', protect, updateMe);
-router.delete('/deleteMe', protect, deleteMe);
+router.patch('/updateMyPassword', updatePassword);
+
+router.patch('/updateMe', updateMe);
+router.delete('/deleteMe', deleteMe);
+
+// After this, every route only accessible to admin
+router.use(authController.restrictTo('admin'));
 
 router.route('/').get(getAllUsers).post(createUser);
 
