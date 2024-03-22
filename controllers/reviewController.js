@@ -1,5 +1,6 @@
 const Review = require("../models/reviewModel");
 const AppError = require("../utils/appError");
+const factory = require('./handlerFactory');
 
 const catchAsync = require("../utils/catchAsync");
 
@@ -31,4 +32,6 @@ exports.createReview = catchAsync(async (req, res, next) => {
             reviews: newReview
         }
     })
-})
+});
+
+exports.deleteReview = factory.deleteOne(Review);

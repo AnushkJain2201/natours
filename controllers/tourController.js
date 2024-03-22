@@ -2,6 +2,8 @@ const AppError = require('../utils/appError');
 const Tour = require('./../models/tourModel');
 const APIFeatures = require('./../utils/apiFeatures');
 
+const factory = require('./handlerFactory');
+
 const catchAsync = require('./../utils/catchAsync');
 
 // A middleware to check whether the body contains the name and the price parameter
@@ -188,18 +190,20 @@ exports.updateTour = catchAsync(async (req, res, next) => {
 	});
 });
 
-exports.deleteTour = catchAsync(async (req, res, next) => {
-	const tour = await Tour.findByIdAndDelete(req.params.id);
+exports.deleteTour = factory.deleteOne(Tour);
 
-	if (!tour) {
-		return next(new AppError('No tour found with that id', 404));
-	}
+// exports.deleteTour = catchAsync(async (req, res, next) => {
+// 	const tour = await Tour.findByIdAndDelete(req.params.id);
 
-	res.status(204).json({
-		status: 'success',
-		data: null,
-	});
-});
+// 	if (!tour) {
+// 		return next(new AppError('No tour found with that id', 404));
+// 	}
+
+// 	res.status(204).json({
+// 		status: 'success',
+// 		data: null,
+// 	});
+// });
 
 exports.getTourStats = catchAsync(async (req, res, next) => {
 	// The aggregate() method will create a pipeline in which we pass an array of stages from which all the documents of Tour model will pass in a defined sequence
