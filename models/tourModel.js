@@ -146,6 +146,13 @@ const tourSchema = new mongoose.Schema({
     toObject: { virtuals: true }
 });
 
+// Create index for price and ratingsAverage for easy read queries
+// 1 means sorting the price index in ascending order and -1 means descending order
+// This index will help in reducing the number of docs getting examined, hence increasing the performance
+// tourSchema.index({price: 1});
+tourSchema.index({price: 1, ratingsAverage: -1});
+tourSchema.index({slug: 1});
+
 // The get function because this property will be created each time that we get some dataout of the database. This get function is a getter
 tourSchema.virtual('durationWeeks').get(function () {
     return this.duration / 7;
