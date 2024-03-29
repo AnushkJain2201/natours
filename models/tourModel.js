@@ -153,6 +153,7 @@ const tourSchema = new mongoose.Schema({
 // tourSchema.index({price: 1});
 tourSchema.index({price: 1, ratingsAverage: -1});
 tourSchema.index({slug: 1});
+tourSchema.index({startLocation: '2dsphere'})
 
 // The get function because this property will be created each time that we get some dataout of the database. This get function is a getter
 tourSchema.virtual('durationWeeks').get(function () {

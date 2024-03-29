@@ -113,7 +113,7 @@ exports.getAllTours = factory.getAll(Tour);
 // Now, we are writing another parameter here that is next because we need next function to pass error that can be handled in the global error middleware
 exports.createTour = factory.createOne(Tour);
 
-exports.getTour = factory.getOne(Tour, {path: 'reviews'});
+exports.getTour = factory.getOne(Tour, { path: 'reviews' });
 
 exports.updateTour = factory.updateOne(Tour);
 
@@ -280,3 +280,26 @@ exports.getMonthlyPlan = catchAsync(async (req, res, next) => {
 		},
 	});
 });
+
+exports.getToursWithin = catchAsync(async (req, res, next) => {
+	const { distance, latlng, unit } = req.params;
+
+	const [lat, lng] = latlng.split(',');
+	const radius = unit === 'mi' ? distance / 3963.2 : distance / 6378.1;
+
+	if (!lat || !lng) {
+		return next(new AppError('Please provide langitude and latitude in the format lat, lng.', 400));
+	}
+
+	//Here, we are using a special geo operator geoWithin. We want to find that tours that starts at a point that is within a radius of distance from the center latlng
+	const tours = await Tour.find({ startLocation: { $geoWithin: { $centerSphere: [[lng, lat], radius] } } });
+
+	res.status(200).json({
+		status: 'success',
+		results: tours.length,
+		data: {
+			data: tours
+		}
+	})
+
+})
