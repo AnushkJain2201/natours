@@ -300,6 +300,46 @@ exports.getToursWithin = catchAsync(async (req, res, next) => {
 		data: {
 			data: tours
 		}
-	})
+	});
+
+});
+
+exports.getDistances = catchAsync(async (req, res, next) => {
+	const {latlng, unit} = req.params;
+	const [lat, lng] = latlng.split(',');
+	const multiplier = unit === 'mi' ? 0.000621371 : 0.001;
+
+	if (!lat || !lng) {
+		return next(new AppError('Please provide langitude and latitude in the format lat, lng.', 400));
+	}
+
+	const distances = await Tour.aggregate([
+		// for geospatial pipeline there is only one stage that is geoNear and this one always need to be first stage in the pipeline
+		// it requires any one of our geospatial field to be index
+		{
+			$geoNear: {
+				near: {
+					type: 'Point',
+					coordinates: [lng * 1, lat * 1]
+				},
+				distanceField: 'distance',
+				distanceMultiplier: multiplier
+			}
+		}, 
+		{
+			$project: {
+				distance: 1,
+				name: 1
+			}
+		}
+	]);
+
+	res.status(200).json({
+		status: 'success',
+		data: {
+			data: distances
+		}
+	});
+
 
 })

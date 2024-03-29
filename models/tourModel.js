@@ -241,14 +241,14 @@ tourSchema.post(/^find/, function (docs, next) {
 });
 
 // Aggregation middleware
-tourSchema.pre('aggregate', function (next) {
-    // Here this points towards current aggregation object and this.pipeline will return the array of all the pipeline stages
-    console.log(this.pipeline());
+// tourSchema.pre('aggregate', function (next) {
+//     // Here this points towards current aggregation object and this.pipeline will return the array of all the pipeline stages
+//     console.log(this.pipeline());
 
-    // here we are adding another stage in the array that will filter out the object whose secretKey is not true
-    this.pipeline().unshift({ $match: { secretTour: { $ne: true } } });
-    next();
-})
+//     // here we are adding another stage in the array that will filter out the object whose secretKey is not true
+//     this.pipeline().unshift({ $match: { secretTour: { $ne: true } } });
+//     next();
+// })
 
 
 

@@ -20,6 +20,9 @@ router.route('/monthly-plan/:year').get(protect, restrictTo('admin', 'lead-guide
 
 router.route('/top-5-cheap').get(aliasTopTours, getAllTours);
 
+// Here we are getting distances of a particular point from all the tours starting point
+router.route('/distances/:latlng/unit/:unit').get(tourController.getDistances);
+
 router.route('/tours-within/:distance/center/:latlng/unit/:unit').get(tourController.getToursWithin);
 
 router.route('/').get(getAllTours).post(protect, restrictTo('admin', 'lead-guide'), createTour);
