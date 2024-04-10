@@ -1,4 +1,5 @@
 const express = require('express');
+const path = require('path');
 
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
@@ -15,12 +16,14 @@ const userRouter = require('./routes/userRoutes')
 const reviewRouter = require('./routes/reviewRoutes');
 
 const app = express();
+app.set('view engine', 'pug');
+app.set('views', path.join(__dirname, 'views'));
 
 // Global middlewares
 // set Security HTTP Headers
 app.use(helmet());
 
-if(process.env.NODE_ENV === 'development') {
+if (process.env.NODE_ENV === 'development') {
     app.use(morgan('dev'));
 }
 
@@ -35,7 +38,7 @@ const limiter = rateLimit({
 app.use('/api', limiter);
 
 // Body parser
-app.use(express.json({limit: '10kb'}));
+app.use(express.json({ limit: '10kb' }));
 
 // Data sanitization against NoSQL query injection
 app.use(mongoSanitize());
@@ -57,8 +60,9 @@ app.use(hpp({
 }));
 
 // Serving static files
-app.use(express.static(`${__dirname}/public`));
 
+// app.use(express.static(`${__dirname}/public`));
+app.use(express.static(path.join(__dirname, 'public')));
 // app.use((req, res, next) => {
 //     console.log("Hello from the middleware");
 
@@ -71,6 +75,14 @@ app.use((req, res, next) => {
     next();
 });
 
+// routes to get the pug pages
+app.get('/', (req, res) => {
+    res.status(200).render('base', {
+        tour: 'The Forest Hiker',
+        user: "Anushk"
+    });
+})
+
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/reviews', reviewRouter);
@@ -78,7 +90,7 @@ app.use('/api/v1/reviews', reviewRouter);
 // A middleware to handle the uncatched Route
 // The app.all will run for routes for all the http methods like get post patch delete etc;
 // The * in the url means all the route that is unhandled
-app.all("*" , (req, res, next) => {
+app.all("*", (req, res, next) => {
     // res.status(404).json({
     //     status: 'failed',
 

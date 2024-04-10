@@ -1,0 +1,22 @@
+doctype html 
+html 
+    head
+        //- Interpolation to insert a variable in the content of a tag
+        title Natours #{tour}
+        link(rel='stylesheet' href='css/style.css')
+        link(rel='shortcut icon' type='image/png' href='img/favicon.png')
+
+    body 
+        //- it is called buffered code as it is going to add something to the output
+        h1= tour 
+        h1= user.toUpperCase()
+
+        //- it is called unbuffered code as it is not going to add anything to the output
+        - const x = 10;
+
+        //- Again buffered code to  display the x
+        h2= 2*x
+
+        //- The normal code
+        //- h1 The Park Camper 
+        p This is just some text 
