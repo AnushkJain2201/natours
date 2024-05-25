@@ -10,3 +10,5 @@ router.get('/tour/:slug', veiwController.getTour);
 
 module.exports = router;
 
+
+
