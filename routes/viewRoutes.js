@@ -6,6 +6,7 @@ const router = express.Router();
 
 router.get('/', veiwController.getOverview);
 
-router.get('/tour', veiwController.getTour);
+router.get('/tour/:slug', veiwController.getTour);
 
 module.exports = router;
+
