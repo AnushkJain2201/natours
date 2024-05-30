@@ -1,5 +1,10 @@
 extends base
 
+block append head
+    script(src="/js/login.js" defer)
+    //- script(src="/js/alert.js" defer)
+    script(src="https://unpkg.com/axios/dist/axios.min.js" )
+    
 block content 
     main.main
         .login-form

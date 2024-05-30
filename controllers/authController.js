@@ -22,7 +22,7 @@ const createSendToken = (user, statusCode, res) => {
         httpOnly: true
     };
 
-    if(process.env.NODE_ENV === 'production') cookieOptions.secure = true;
+    if (process.env.NODE_ENV === 'production') cookieOptions.secure = true;
 
     res.cookie('jwt', token, cookieOptions);
 
@@ -102,6 +102,8 @@ exports.protect = catchAsync(async (req, res, next) => {
     let token;
     if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
         token = req.headers.authorization.split(' ')[1];
+    } else if (req.cookies.jwt) {
+        token = req.cookies.jwt;
     }
 
     // If token is undefined we will return an error
@@ -243,4 +245,32 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
     createSendToken(user, 200, res);
 
 
-})
+});
+
+// only for rendering pages for the users logged in or without logged in
+exports.isLoggedIn = catchAsync(async (req, res, next) => {
+
+    let token;
+    if (req.cookies.jwt) {
+        token = req.cookies.jwt;
+
+        // verifies the token 
+        const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
+    
+        // 3) Check if user still exists
+        const currentUser = await User.findById(decoded.id);
+        if (!currentUser) {
+            return next();
+        }
+
+        // 4) Check if user changed password after the token was issued
+        if (currentUser.changedPasswordAfter(decoded.iat)) {
+            return next();
+        }
+
+        // There is a logged in user
+        res.locals.user = currentUser;
+        return next();        
+    }
+    next();
+});
