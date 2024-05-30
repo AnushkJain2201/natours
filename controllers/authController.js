@@ -248,29 +248,44 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
 });
 
 // only for rendering pages for the users logged in or without logged in
-exports.isLoggedIn = catchAsync(async (req, res, next) => {
+exports.isLoggedIn = async (req, res, next) => {
 
     let token;
     if (req.cookies.jwt) {
-        token = req.cookies.jwt;
+        try {
+            token = req.cookies.jwt;
 
-        // verifies the token 
-        const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
-    
-        // 3) Check if user still exists
-        const currentUser = await User.findById(decoded.id);
-        if (!currentUser) {
+            // verifies the token 
+            const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
+
+            // 3) Check if user still exists
+            const currentUser = await User.findById(decoded.id);
+            if (!currentUser) {
+                return next();
+            }
+
+            // 4) Check if user changed password after the token was issued
+            if (currentUser.changedPasswordAfter(decoded.iat)) {
+                return next();
+            }
+
+            // There is a logged in user
+            res.locals.user = currentUser;
+            return next();
+        } catch (err) {
             return next();
         }
-
-        // 4) Check if user changed password after the token was issued
-        if (currentUser.changedPasswordAfter(decoded.iat)) {
-            return next();
-        }
-
-        // There is a logged in user
-        res.locals.user = currentUser;
-        return next();        
     }
     next();
-});
+}
+
+exports.logout = (req, res) => {
+    res.cookie('jwt', 'loggedout', {
+        expires: new Date(Date.now() + 10 * 1000),
+        httpOnly: true
+    });
+    res.status(200).json({
+        status: 'success',
+        message: 'Logged out!'
+    });
+}

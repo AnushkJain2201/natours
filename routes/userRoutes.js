@@ -3,7 +3,7 @@ const userController = require('./../controllers/userController');
 const authController = require('./../controllers/authController');
 
 const { getAllUsers, createUser, getUser, updateUser, deleteUser, updateMe, deleteMe, getMe } = userController;
-const { signup, login, forgotPassword, resetPassword, protect, updatePassword } = authController;
+const { signup, login, forgotPassword, resetPassword, protect, updatePassword, logout } = authController;
 
 
 const router = express.Router();
@@ -12,6 +12,7 @@ router.get('/me', protect, getMe, getUser);
 
 router.post('/signup', signup);
 router.post('/login', login);
+router.get('/logout', logout);
 
 router.post('/forgotPassword', forgotPassword);
 router.patch('/resetPassword/:token', resetPassword);

@@ -1,6 +1,6 @@
 const hideAlert = () => {
     const el = document.querySelector('.alert');
-    if(el) {
+    if (el) {
         el.parentElement.removeChild(el);
     }
 }
@@ -10,6 +10,22 @@ const showAlert = (type, msg) => {
     const markup = `<div className="alert alert--${type}">${msg}</div>`;
     document.querySelector('body').insertAdjacentHTML('afterbegin', markup);
     window.setTimeout(hideAlert, 5000);
+}
+
+const logout = async () => {
+    try {
+        const res = await axios({
+            method: 'GET',
+            url: 'http://127.0.0.1:3000/api/v1/users/logout',
+        });
+
+        if (res.data.status === 'success') {
+            location.reload(true);
+        }
+    } catch (err) {
+        console.log(err.message);
+        showAlert('error', "There is an error loggin out, try again");
+    }
 }
 
 const login = async (email, password) => {
@@ -23,24 +39,37 @@ const login = async (email, password) => {
             }
         });
 
-        if(res.data.status === 'success') {
+        if (res.data.status === 'success') {
             showAlert('success', 'Logged in successfully');
             window.setTimeout(() => {
                 location.assign('/');
             }, 1500);
         }
-    } catch(err) {
+    } catch (err) {
         showAlert('error', err.response.data.message);
     }
-    
+
 }
 
-document.querySelector(".form").addEventListener("submit", (e) => {
-    e.preventDefault();
+const logoutBTN = document.querySelector(".nav__el--logout");
 
-    const email = document.getElementById("email").value;
-    const password = document.getElementById("password").value;
+if (logoutBTN) {
+    logoutBTN.addEventListener('click', () => {
+        logout();
+    })
+}
 
-    login(email, password);
+const loginForm = document.querySelector(".form");
 
-});
+if(loginForm) {
+    loginForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+    
+        const email = document.getElementById("email").value;
+        const password = document.getElementById("password").value;
+    
+        login(email, password);
+    
+    });
+}
+
