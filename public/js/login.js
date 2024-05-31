@@ -11,6 +11,7 @@ const showAlert = (type, msg) => {
     document.querySelector('body').insertAdjacentHTML('afterbegin', markup);
     window.setTimeout(hideAlert, 5000);
 }
+// axios.defaults.withCredentials = true;
 
 const logout = async () => {
     try {
@@ -20,7 +21,8 @@ const logout = async () => {
         });
 
         if (res.data.status === 'success') {
-            location.reload(true);
+            // location.reload(true);
+            location.assign('/')
         }
     } catch (err) {
         console.log(err.message);
@@ -33,6 +35,7 @@ const login = async (email, password) => {
         const res = await axios({
             method: 'POST',
             url: 'http://127.0.0.1:3000/api/v1/users/login',
+            withCredentials: true,
             data: {
                 email,
                 password,
@@ -44,6 +47,7 @@ const login = async (email, password) => {
             window.setTimeout(() => {
                 location.assign('/');
             }, 1500);
+            console.log(res.headers);
         }
     } catch (err) {
         showAlert('error', err.response.data.message);
@@ -61,15 +65,15 @@ if (logoutBTN) {
 
 const loginForm = document.querySelector(".form");
 
-if(loginForm) {
+if (loginForm) {
     loginForm.addEventListener("submit", (e) => {
         e.preventDefault();
-    
+
         const email = document.getElementById("email").value;
         const password = document.getElementById("password").value;
-    
+
         login(email, password);
-    
+
     });
 }
 

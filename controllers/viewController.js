@@ -8,7 +8,7 @@ exports.getOverview = catchAsync(async (req, res, next) => {
     // build The template
 
     // render the template using the data from 1
-    res.status(200).render('overview', {
+    res.status(200).set('Content-Security-Policy', "frame-src 'self'").render('overview', {
         title: 'All Tours',
         tours
     });
@@ -35,7 +35,13 @@ exports.getTour = catchAsync(async (req, res, next) => {
 })
 
 exports.getLoginForm = (req, res) => {
-    res.status(200).render('login', {
+    res.status(200).set('Content-Security-Policy', "frame-src 'self'").render('login', {
         title: 'Login'
+    });
+}
+
+exports.getAccount = (req, res) => {
+    res.status(200).set('Content-Security-Policy', "frame-src 'self'").render('account', {
+        title: 'Your Account'
     });
 }
