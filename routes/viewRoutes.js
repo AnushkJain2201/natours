@@ -12,6 +12,8 @@ router.get('/login', authController.isLoggedIn, veiwController.getLoginForm);
 
 router.get('/me', authController.protect, veiwController.getAccount);
 
+router.post('/submit-user-data', authController.protect, veiwController.updateUserData);
+
 module.exports = router;
 
 

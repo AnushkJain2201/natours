@@ -220,6 +220,9 @@ app.use(express.json({ limit: '10kb' }));
 app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 app.use(cookieParser());
 
+// We needed this parser to get data from req.body while sending it through form
+app.use(express.urlencoded({extended: true, limit: '10kb'}));
+
 // Data sanitization against NoSQL query injection
 app.use(mongoSanitize());
 
