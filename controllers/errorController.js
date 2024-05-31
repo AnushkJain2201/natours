@@ -32,29 +32,57 @@ const handleVaidationErrorDB = (err) => {
 	return new AppError(message, 400);
 };
 
-const sendErrorDev = (err, res) => {
-	res.status(err.statusCode).json({
-		status: err.status,
-		error: err,
+const sendErrorDev = (err, req, res) => {
+
+	// if the url starts with api that means its an API error then we simply return json error
+	if (req.originalUrl.startsWith('/api')) {
+		return res.status(err.statusCode).json({
+			status: err.status,
+			error: err,
+			message: err.message,
+			stack: err.stack,
+		});
+	}
+	// else its an frontend error so we have to show an error message
+
+	return res.status(err.statusCode).render('error', {
+		title: 'Something went wrong',
 		message: err.message,
-		stack: err.stack,
-	});
+	})
 };
 
-const sendErrorProd = (err, res) => {
-	if (err.isOperational) {
-		res.status(err.statusCode).json({
-			status: err.status,
-			message: err.message,
-		});
-	} else {
+const sendErrorProd = (err, req, res) => {
+
+	// if the url starts with api that means its an API error then we simply return json error
+	if (req.originalUrl.startsWith('/api')) {
+		if (err.isOperational) {
+			return res.status(err.statusCode).json({
+				status: err.status,
+				message: err.message,
+			});
+		}
 		console.error('Error', err);
 
-		res.status(500).json({
+		return res.status(500).json({
 			status: 'error',
 			message: 'Something went very wrong!',
 		});
 	}
+	// else its an frontend error so we have to show an error message
+
+	if (err.isOperational) {
+		return res.status(err.statusCode).render('error', {
+			title: 'Something went wrong',
+			message: err.message,
+		})
+	}
+	console.error('Error', err);
+
+	return res.status(err.statusCode).render('error', {
+		title: 'Something went wrong',
+		message: 'Please try again later',
+	})
+
 };
 
 // A global error handlin middleware
@@ -63,10 +91,11 @@ module.exports = (err, req, res, next) => {
 	err.status = err.status || 'error';
 
 	if (process.env.NODE_ENV === 'development') {
-		sendErrorDev(err, res);
+		sendErrorDev(err, req, res);
 	} else if (process.env.NODE_ENV === 'production') {
 		//This is somehow not working
 		let error = { ...err };
+		error.message = err.message;
 
 		// The name of the err is CastError if the Database ID is invalid
 		if (err.name === 'CastError') {
@@ -86,14 +115,14 @@ module.exports = (err, req, res, next) => {
 		}
 
 		// Handler for tampering of Json web token
-		if(err.name === 'JsonWebTokenError') {
+		if (err.name === 'JsonWebTokenError') {
 			error = handleJWTError();
 		}
 
-		if(err.name === 'TokenExpiredError') {
+		if (err.name === 'TokenExpiredError') {
 			error = handleJWTExpiredError();
 		}
 
-		sendErrorProd(error, res);
+		sendErrorProd(error, req, res);
 	}
 };
