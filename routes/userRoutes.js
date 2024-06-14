@@ -1,10 +1,10 @@
 const express = require('express');
+const multer = require('multer');
 const userController = require('./../controllers/userController');
 const authController = require('./../controllers/authController');
 
 const { getAllUsers, createUser, getUser, updateUser, deleteUser, updateMe, deleteMe, getMe } = userController;
 const { signup, login, forgotPassword, resetPassword, protect, updatePassword, logout } = authController;
-
 
 const router = express.Router();
 
@@ -22,7 +22,7 @@ router.use(protect);
 
 router.patch('/updateMyPassword', updatePassword);
 
-router.patch('/updateMe', updateMe);
+router.patch('/updateMe', userController.uploadUserPhoto, updateMe);
 router.delete('/deleteMe', deleteMe);
 
 // After this, every route only accessible to admin
