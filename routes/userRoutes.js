@@ -22,7 +22,7 @@ router.use(protect);
 
 router.patch('/updateMyPassword', updatePassword);
 
-router.patch('/updateMe', userController.uploadUserPhoto, updateMe);
+router.patch('/updateMe', userController.uploadUserPhoto, userController.resizeUserPhoto, updateMe);
 router.delete('/deleteMe', deleteMe);
 
 // After this, every route only accessible to admin
