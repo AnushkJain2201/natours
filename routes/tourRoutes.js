@@ -27,7 +27,7 @@ router.route('/tours-within/:distance/center/:latlng/unit/:unit').get(tourContro
 
 router.route('/').get(getAllTours).post(protect, restrictTo('admin', 'lead-guide'), createTour);
 
-router.route('/:id').get(getTour).patch(protect, restrictTo('admin', 'lead-guide'), updateTour).delete(protect, restrictTo('admin', 'lead-guide'), deleteTour);
+router.route('/:id').get(getTour).patch(protect, restrictTo('admin', 'lead-guide'), tourController.uploadTourImages, tourController.resizeTourImages, updateTour).delete(protect, restrictTo('admin', 'lead-guide'), deleteTour);
 
 // router.route('/:tourId/reviews').post(protect, restrictTo('user'), createReview);
 
