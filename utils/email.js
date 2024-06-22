@@ -1,14 +1,13 @@
 const nodemailer = require('nodemailer');
 const pug = require('pug');
-const htmlToText = require('htmltotext');
-
+const htmlToText = require('html-to-text');
 // sending welcome email will be done by the sendWelcome() function. Similarly we will create different functions for sending email at different instances.
 // new Email(user, url).sendWelcome();
 module.exports = class Email {
     constructor(user, url) {
         this.to = user.email;
         this.firstName = user.name.split(' ')[0];
-        this.utl = url;
+        this.url = url;
         this.from = `Anushk Jain <${process.env.EMAIL_FROM}>`
     }
 
@@ -56,7 +55,7 @@ module.exports = class Email {
             to: this.to,
             subject,
             html,
-            text: htmlToText.fromString(html)
+            text: htmlToText.convert(html)
         };
 
         // 3) Create a transporter and send mail
@@ -67,6 +66,11 @@ module.exports = class Email {
     async sendWelcome() {
         // the template will be a pug template
         await this.send('welcome', 'Welcome to the Natours Family!');
+    }
+
+    // this will send the password reset email
+    async sendPasswordReset() {
+        await this.send('passwordReset', 'Your password reset token (valid for only 10 minutes)');
     }
 
 }
