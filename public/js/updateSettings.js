@@ -1,6 +1,6 @@
 const settingForm = document.querySelector('.form-user-data');
 const passwordForm = document.querySelector('.form-user-password');
-console.log(passwordForm);
+// console.log(passwordForm);
 
 const hideAlerts = () => {
     const el = document.querySelector('.alert');

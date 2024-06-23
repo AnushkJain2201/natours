@@ -170,7 +170,7 @@ const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
 const reviewRouter = require('./routes/reviewRoutes');
 const viewRouter = require('./routes/viewRoutes');
-
+const bookingRouter = require('./routes/bookingRoutes');
 const app = express();
 
 app.set('view engine', 'pug');
@@ -186,14 +186,15 @@ const corsOptions ={
 // Serving static files
 app.use(express.static(path.join(__dirname, 'public')));
 
+
 // Set security HTTP headers
 app.use(
     helmet.contentSecurityPolicy({
         directives: {
-            defaultSrc: ["'self'"],
+            defaultSrc: ["'self'", "https://js.stripe.com/v3"],
             baseUri: ["'self'"],
             fontSrc: ["'self'", 'https:', 'data:'],
-            scriptSrc: ["'self'", 'https://unpkg.com/axios/dist/axios.min.js'],
+            scriptSrc: ["'self'", 'https://js.stripe.com/', 'https://unpkg.com/axios/dist/axios.min.js'],
             objectSrc: ["'none'"],
             styleSrc: ["'self'", 'https:', 'unsafe-inline'],
             connectSrc: ["'self'", 'http://127.0.0.1:3000/'],
@@ -255,6 +256,7 @@ app.use('/', viewRouter);
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/reviews', reviewRouter);
+app.use('/api/v1/bookings', bookingRouter);
 
 app.all('*', (req, res, next) => {
   next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));

@@ -3,7 +3,6 @@ const pug = require('pug');
 const htmlToText = require('html-to-text');
 // sending welcome email will be done by the sendWelcome() function. Similarly we will create different functions for sending email at different instances.
 // new Email(user, url).sendWelcome();
-console.log(process.env.NODE_ENV === 'production');
 module.exports = class Email {
     constructor(user, url) {
         this.to = user.email;
