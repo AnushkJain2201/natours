@@ -215,7 +215,8 @@ app.use('/', rateLimit({
   windowMs: 60 * 60 * 1000,
   message: 'Too many requests from this IP, please try again in an hour!',
   validate: {
-    trustProxy: false
+    trustProxy: false,
+    xForwardedForHeader: false
   },
 }))
 
