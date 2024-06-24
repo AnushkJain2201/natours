@@ -44,7 +44,7 @@ const sendErrorDev = (err, req, res) => {
 		});
 	}
 	// else its an frontend error so we have to show an error message
-
+	console.log("Error ----------", err);
 	return res.status(err.statusCode).render('error', {
 		title: 'Something went wrong',
 		message: err.message,

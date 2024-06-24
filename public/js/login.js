@@ -17,7 +17,7 @@ const logout = async () => {
     try {
         const res = await axios({
             method: 'GET',
-            url: 'http://127.0.0.1:3000/api/v1/users/logout',
+            url: '/api/v1/users/logout',
         });
 
         if (res.data.status === 'success') {
@@ -34,7 +34,7 @@ const login = async (email, password) => {
     try {
         const res = await axios({
             method: 'POST',
-            url: 'http://127.0.0.1:3000/api/v1/users/login',
+            url: '/api/v1/users/login',
             withCredentials: true,
             data: {
                 email,
@@ -47,7 +47,7 @@ const login = async (email, password) => {
             window.setTimeout(() => {
                 location.assign('/');
             }, 1500);
-            console.log(res.headers);
+            // console.log(res.headers);
         }
     } catch (err) {
         showAlert('error', err.response.data.message);

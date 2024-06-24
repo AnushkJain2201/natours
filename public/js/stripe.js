@@ -5,7 +5,7 @@ const bookBtn = document.getElementById("book-tour");
 console.log(bookBtn);
 
 const bookTour = async tourId => {
-    const response = await axios(`http://127.0.0.1:3000/api/v1/bookings/checkout-session/${tourId}`)
+    const response = await axios(`/api/v1/bookings/checkout-session/${tourId}`)
     // console.log(response.data.session.url);
     window.location.href = response.data.session.url;
 }

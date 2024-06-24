@@ -18,7 +18,7 @@ const showAlerts = (type, msg) => {
 
 const updateSettings = async (data, type) => {
     try {
-        const url = type === 'password' ? 'http://127.0.0.1:3000/api/v1/users/updateMyPassword' : 'http://127.0.0.1:3000/api/v1/users/updateMe';
+        const url = type === 'password' ? '/api/v1/users/updateMyPassword' : '/api/v1/users/updateMe';
         const res = await axios({
             method: 'PATCH',
             url,
@@ -59,12 +59,6 @@ if (passwordForm) {
         const passwordCurrent = document.getElementById("password-current").value;
         const password = document.getElementById("password").value;
         const passwordConfirm = document.getElementById("password-confirm").value;
-
-        console.log(passwordConfirm);
-        console.log(password);
-        console.log(passwordCurrent);
-
         updateSettings({ passwordCurrent, password, passwordConfirm }, "password");
-
     })
 }

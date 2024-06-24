@@ -17,7 +17,6 @@ module.exports = class Email {
 
         if (process.env.NODE_ENV === 'production') {
             // Send using the sendgrid services
-            console.log("i ma here n oehngtoewh aew sdnfo hnweo ");
             return nodemailer.createTransport({
                 service: "outlook",
                 host: "smtp-mail.outlook.com",

@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', function () {
     const locations = JSON.parse(document.getElementById('map').dataset.locations);
-    console.log(locations);
+    // console.log(locations);
 
     mapboxgl.accessToken = 'pk.eyJ1IjoiYW51c2hrMjIwMSIsImEiOiJjbHdtMzRtaTcwYmU0Mmlyem00d3Ruc3I5In0.oMva6sUtIzA-mck7hJx6_Q';
     let map = new mapboxgl.Map({
