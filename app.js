@@ -162,7 +162,7 @@ const mongoSanitize = require('express-mongo-sanitize');
 const xss = require('xss-clean');
 const hpp = require('hpp');
 const cookieParser = require('cookie-parser');
-const compression = require('compression'); 
+const compression = require('compression');
 const cors = require('cors');
 
 const AppError = require('./utils/appError');
@@ -191,24 +191,33 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Set security HTTP headers
 app.use(
-    helmet.contentSecurityPolicy({
-        directives: {
-            defaultSrc: ["'self'", "https://js.stripe.com/v3"],
-            baseUri: ["'self'"],
-            fontSrc: ["'self'", 'https:', 'data:'],
-            scriptSrc: ["'self'", 'https://js.stripe.com/', 'https://unpkg.com/axios/dist/axios.min.js'],
-            objectSrc: ["'none'"],
-            styleSrc: ["'self'", 'https:', 'unsafe-inline'],
-            connectSrc: ["'self'", 'http://127.0.0.1:3000/'],
-            upgradeInsecureRequests: [],
-        },
-    })
+  helmet.contentSecurityPolicy({
+    directives: {
+      defaultSrc: ["'self'", "https://js.stripe.com/v3"],
+      baseUri: ["'self'"],
+      fontSrc: ["'self'", 'https:', 'data:'],
+      scriptSrc: ["'self'", 'https://js.stripe.com/', 'https://unpkg.com/axios/dist/axios.min.js'],
+      objectSrc: ["'none'"],
+      styleSrc: ["'self'", 'https:', 'unsafe-inline'],
+      connectSrc: ["'self'", 'http://127.0.0.1:3000/'],
+      upgradeInsecureRequests: [],
+    },
+  })
 );
 
 // Development logging
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
+
+app.use('/', rateLimit({
+  max: 100,
+  windowMs: 60 * 60 * 1000,
+  message: 'Too many requests from this IP, please try again in an hour!',
+  validate: {
+    trustProxy: false
+  },
+}))
 
 // Limit requests from same API
 const limiter = rateLimit({
@@ -218,7 +227,7 @@ const limiter = rateLimit({
 });
 app.use('/api', limiter);
 
-app.post('/webhook-checkout', express.raw({type: 'application/json'}), bookingController.webhookCheckout);
+app.post('/webhook-checkout', express.raw({ type: 'application/json' }), bookingController.webhookCheckout);
 
 // Body parser, reading data from body into req.body
 app.use(express.json({ limit: '10kb' }));
@@ -226,7 +235,7 @@ app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 app.use(cookieParser());
 
 // We needed this parser to get data from req.body while sending it through form
-app.use(express.urlencoded({extended: true, limit: '10kb'}));
+app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 
 // Data sanitization against NoSQL query injection
 app.use(mongoSanitize());
