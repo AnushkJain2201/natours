@@ -177,11 +177,10 @@ const app = express();
 app.set('view engine', 'pug');
 app.set('views', path.join(__dirname, 'views'));
 
-const corsOptions ={
-    origin: true, //included origin as true
-    credentials: true, //included credentials as true
-}
-// app.use(cors(corsOptions));
+app.use(cors());
+
+app.options('*', cors());
+// app.options('/api/v1/tours/:id', cors());
 
 // 1) GLOBAL MIDDLEWARES
 // Serving static files
